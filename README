@@ -1,0 +1,3 @@
+Developed in Ruby on the Rails framework:
+Script which uses Chronic (Ruby based Natural Language Proccessor) to parse time and date information from e-mails
+generating a time object which is then pushed to the google calender api which to make events
