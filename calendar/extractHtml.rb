@@ -14,14 +14,18 @@ service.authenticate("davidyin1212", "99003344")
 def timeParse (time)
 	begT = Time.parse(time.split('-')[0].strip)
 	lastT = Time.parse(time.split('T')[0].strip + 'T' + time.split('-')[1].strip)
-	puts begT
-	puts lastT
 	return begT, lastT
 end
 
 elements = doc.css("table")[0].css("tr[height='60']")
 timeDay = Time.now.day
+endDay = (Time.new(Time.now.year, 12, 31) - Time.now).to_i/(24*60*60*7)
+puts endDay
 day = ["", "MO", "TU", "WE", "TH", "FR"]
+cal = Calendar.new(service)
+cal.title = 'testcalendar'+Time.now.to_s
+cal.save
+roomnum = 0
 #puts elements.length
 #puts elements
 
@@ -33,20 +37,22 @@ for i in 0..elements.length - 1
 	puts i
 	puts row = elements[i].css('td')
 	for j in 0..row.length - 1
-		#puts row[j]["class"]
+		puts row[j]["class"]
 		if row[j]["class"] == "class2"
-			puts time = Time.now.year.to_s + '/' + Time.now.month.to_s + '/' + (timeDay-(Time.now.wday-j)).to_s + 'T' + row[j].text[18..28] 
-			event = Event.new(service)
-			event.title = row[j].text.split('LEC')[0].strip + ' ' + row[j].text[10..17]
-			event.calendar = service.calendars[0] 
-			event.where = "Municipal Stadium"
-			event.recurrence = Recurrence.new
-			event.recurrence.start_time, event.recurrence.end_time = timeParse(time)
-			event.recurrence.frequency = {"weekly" => [day[j]]} 
-		 	#event.recurrence.frequency = {"interval" => "2"}
-			puts DateTime.new(2013,12,31)
-			event.recurrence.repeat_until = DateTime.new(2013,12,31) #Date.parse("2013-12-31") + 
-			event.save 
+			for a in 0..endDay
+				puts time = Time.now.year.to_s + '/' + Time.now.month.to_s + '/' + (timeDay-(Time.now.wday-j)).to_s + 'T' + row[j].text[18..28] 
+				event = Event.new(service)
+				event.title = row[j].text.split('LEC')[0].strip + ' ' + row[j].text[10..17]
+				event.calendar = cal 
+				puts roomnum
+				puts event.where = doc.css("span.room")[roomnum].text
+				#event.recurrence = Recurrence.new
+				puts event.start_time = timeParse(time)[0] + (7*24*60*60*a)
+				puts event.end_time = timeParse(time)[1] + (7*24*60*60*a)
+				#event.recurrence.frequency = {"weekly" => [day[j]]} 
+				event.save
+			end		
+		roomnum+=1
 		end
 	end
 end
